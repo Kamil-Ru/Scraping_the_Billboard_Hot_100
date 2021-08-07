@@ -20,7 +20,7 @@ from spotipy.oauth2 import SpotifyOAuth
 
 scope = "user-library-read"
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-library-read user-read-playback-state playlist-modify-private", username=USER))
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-library-read user-read-playback-state playlist-modify-private playlist-modify-public", username=USER))
 
 results = sp.current_user_saved_tracks()
 for idx, item in enumerate(results['items']):
@@ -60,22 +60,24 @@ print(track_name)
 print(track_URL)
 print(track_uri)
 
-sp.user_playlist_create(user=USER, name="TEST", public=False)
+new_playlist = sp.user_playlist_create(user=USER, name="TEST", public=False)
+print(new_playlist)
+
+new_playlist_ID = new_playlist["id"]
+print(new_playlist_ID)
 
 #delete this
 device = sp.devices()
 print(device)
 
-list_playlist = sp.current_user_playlists()
-print(list_playlist)
+# list_playlist = sp.current_user_playlists()
+# print(list_playlist)
 
-for item in list_playlist["items"]:
-    print(item["name"])
-    if item["name"] == "TEST":
-        id = item["id"]
-        print("JEST")
+#  for item in list_playlist["items"]:
+#      print(item["name"])
+#      if item["name"] == "TEST":
+#          id = item["id"]
+#          print("JEST")
+#
 
-print(id)
-
-
-# sp.playlist_add_items(playlist_id="TEST", items=track_uri)
+sp.playlist_add_items( playlist_id=new_playlist_ID, items=["spotify:track:0b9oOr2ZgvyQu88wzixux9"], position=None)
