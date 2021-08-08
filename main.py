@@ -6,8 +6,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 USER = password.USER
-Spotify_ID = password.Client_ID
-Spotify_password = password.Client_Secret
 
 # Input user date
 while True:
@@ -20,37 +18,30 @@ while True:
         break
 
 # searching track on www.billboard.com
-URL = "https://www.billboard.com/charts/hot-100/"
-URL_and_date = URL + date
-
-response = requests.get(URL_and_date)
+response = requests.get("https://www.billboard.com/charts/hot-100/" + date)
 billboard_web_page = response.text
 
 soup = BeautifulSoup(billboard_web_page, "html.parser")
 all_music = soup.find_all(name="span", class_="chart-element__information__song text--truncate color--primary")
 
-all_music_list = [song.get_text() for song in all_music]
+all_song_list = [song.get_text() for song in all_music]
 
 # Login to Spotify
-scope = "playlist-modify-public"
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, username=USER))
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="playlist-modify-public", username=USER))
 
 # Getting year from user date
 year = date.split("-")[0]
 
 # Creating list URI of searching music
 track_URI_list = []
-for music in all_music_list:
-    q = f"track: {music} year: {year}"
+for song in all_song_list:
+    q = f"track: {song} year: {year}"
     search_track = sp.search(q=q, limit=1, type="track")
-
     if not search_track["tracks"]["items"]:
-        continue
-
+        print(f"{song} doesn't exist in Spotify. Skipped.")
     else:
         track_uri = search_track["tracks"]["items"][0]["uri"]
         track_URI_list.append(track_uri)
-
 
 # Creating empty playlist on Spotify
 new_playlist = sp.user_playlist_create(user=USER, name=f"{date} Billboard 100", public=False)
