@@ -3,7 +3,9 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import password
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
+
+USER = password.USER
 
 Spotify_ID = password.Client_ID
 Spotify_password = password.Client_Secret
@@ -33,3 +35,29 @@ print(all_music)
 all_music_list = [song.get_text() for song in all_music]
 
 print(all_music_list)
+
+scope = "playlist-modify-public"
+
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, username=USER))
+
+year = date.split("-")[0]
+print(year)
+
+track_URI_list = []
+
+for music in all_music_list:
+    q = f"track: {music} year: {year}"
+    search_track = sp.search(q=q, limit=1, type="track")
+    print(search_track)
+    try:
+        track_uri = search_track["tracks"]["items"][0]["uri"]
+        track_URI_list.append(track_uri)
+        print(track_uri)
+    except IndexError:
+        print("NONE")
+
+
+new_playlist = sp.user_playlist_create(user=USER, name=f"{date} Billboard 100", public=False)
+new_playlist_ID = new_playlist["id"]
+
+sp.playlist_add_items(playlist_id=new_playlist_ID, items=track_URI_list, position=None)
